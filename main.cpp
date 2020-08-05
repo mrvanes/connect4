@@ -57,21 +57,68 @@ int main(int argc, char** argv) {
       }
     }
   }
-  solver.loadBook(opening_book);
+//   solver.loadBook(opening_book);
 
+  std::string l;
   std::string line;
+  std::string newLine;
+  std::string play;
 
-  for(int l = 1; std::getline(std::cin, line); l++) {
+  for(int ply = 1; std::getline(std::cin, l); ply++) {
     Position P;
-    if(P.play(line) != line.size()) {
-      std::cerr << "Line " << l << ": Invalid move " << (P.nbMoves() + 1) << " \"" << line << "\"" << std::endl;
+    newLine = line + l;
+
+    std::cout << "User Playing " << newLine << std::endl;
+    unsigned int i = P.play(newLine);
+    if(i != newLine.size()) {
+      if (P.isWinningMove(newLine[i]-'1')) {
+          std::cout << "Winning move!" << std::endl;
+          return 0;
+
+      } else {
+          std::cout << "User Invalid move " << (P.nbMoves() + 1) << " \"" << newLine << "\"" << std::endl;
+      }
     } else {
-      solver.reset();
-      unsigned long long start_time = getTimeMicrosec();
-      int score = solver.solve(P, weak);
-      unsigned long long end_time = getTimeMicrosec();
-      std::cout << line << " " << score << " " << solver.getNodeCount() << " " << (end_time - start_time);
+      line = newLine;
+      Position::position_t possible = P.possibleNonLosingMoves();
+      int maxScore = Position::MIN_SCORE;
+      int bestCol = 3; // play column 4
+      for(int i = Position::WIDTH; i--;) {
+        solver.reset();
+        Position P2(P);
+        if (P2.isWinningMove(i)) {
+          std::cout << line << "." << i + 1 << ", s: Winning" << std::endl;
+          bestCol = i;
+          break;
+        }
+        if(possible & Position::column_mask(i)) {
+          P2.playCol(i);
+          unsigned long long start_time = getTimeMicrosec();
+          int score = -solver.solve(P2, weak);
+          unsigned long long end_time = getTimeMicrosec();
+          std::cout << line << "." << i + 1 << ", s: " << score << ", t: " << (end_time - start_time) << std::endl;
+          if (score > maxScore) {
+            maxScore = score;
+            bestCol = i;
+          }
+        } else {
+          std::cout << line << "." << i + 1 << ", s: not possible"  << std::endl;
+        }
+      }
+      play = std::to_string(bestCol + 1);
+      line = line + play;
+      std::cout << "Computer Playing " << play << std::endl;
+
+      Position P2;
+      i = P2.play(line);
+      if(i != line.size()) {
+        if (P2.isWinningMove(line[i]-'1')) {
+            std::cout << "Winning move!" << std::endl;
+            return 0;
+        } else {
+            std::cout << "Computer Invalid move " << (P2.nbMoves() + 1) << " \"" << line << "\"" << std::endl;
+        }
+      }
     }
-    std::cout << std::endl;
   }
 }

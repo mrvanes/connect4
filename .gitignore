@@ -29,3 +29,7 @@
 
 # vim swap file
 *.swp
+
+# Targets
+.depend
+c4solver

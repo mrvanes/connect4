@@ -21,16 +21,18 @@
 
 #include "Position.hpp"
 #include "TranspositionTable.hpp"
-#include "OpeningBook.hpp"
+// #include "OpeningBook.hpp"
 
 namespace GameSolver {
 namespace Connect4 {
 
 class Solver {
  private:
-  static constexpr int TABLE_SIZE = 24; // store 2^TABLE_SIZE elements in the transpositiontbale
+  static constexpr int TABLE_SIZE = 14; // store 2^TABLE_SIZE elements in the transpositiontbale
+//   static constexpr int DEPTH = Position::WIDTH*Position::HEIGHT // number of ply to evaluate
+  static constexpr int DEPTH = 16; // number of ply to evaluate
   TranspositionTable < uint_t < Position::WIDTH*(Position::HEIGHT + 1) - TABLE_SIZE >, Position::position_t, uint8_t, TABLE_SIZE > transTable;
-  OpeningBook book{Position::WIDTH, Position::HEIGHT}; // opening book
+//   OpeningBook book{Position::WIDTH, Position::HEIGHT}; // opening book
   unsigned long long nodeCount; // counter of explored nodes.
   int columnOrder[Position::WIDTH]; // column exploration order
 
@@ -45,7 +47,7 @@ class Solver {
    * - if actual score of position >= beta then beta <= return value <= actual score
    * - if alpha <= actual score <= beta then return value = actual score
    */
-  int negamax(const Position &P, int alpha, int beta);
+  int negamax(const Position &P, int alpha, int beta, int ply);
 
  public:
 
@@ -60,9 +62,9 @@ class Solver {
     transTable.reset();
   }
 
-  void loadBook(std::string book_file) {
-    book.load(book_file);
-  }
+//   void loadBook(std::string book_file) {
+//     book.load(book_file);
+//   }
 
   Solver(); // Constructor
 };
