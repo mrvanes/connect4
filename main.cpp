@@ -44,6 +44,8 @@ unsigned long long getTimeMicrosec() {
  *  will generate an error message to standard error and an empty line to standard output.
  */
 int main(int argc, char** argv) {
+  time_t t;
+  srand((unsigned) time(&t));
 
   Solver solver;
 
@@ -82,13 +84,14 @@ int main(int argc, char** argv) {
       line = newLine;
       Position::position_t possible = P.possibleNonLosingMoves();
       int maxScore = Position::MIN_SCORE;
-      int bestCol = 3; // play column 4
+      int bestCols[Position::WIDTH + 1] = {0};
       for(int i = Position::WIDTH; i--;) {
         solver.reset();
         Position P2(P);
         if (P2.isWinningMove(i)) {
           std::cout << line << "." << i + 1 << ", s: Winning" << std::endl;
-          bestCol = i;
+          bestCols[0] = 1;
+          bestCols[1] = i + 1;
           break;
         }
         if(possible & Position::column_mask(i)) {
@@ -99,13 +102,24 @@ int main(int argc, char** argv) {
           std::cout << line << "." << i + 1 << ", s: " << score << ", t: " << (end_time - start_time) << std::endl;
           if (score > maxScore) {
             maxScore = score;
-            bestCol = i;
+            bestCols[0] = 1;
+            bestCols[1] = i + 1;
+          } else if (score == maxScore) {
+            bestCols[++bestCols[0]] = i + 1;
           }
         } else {
           std::cout << line << "." << i + 1 << ", s: not possible"  << std::endl;
         }
       }
-      play = std::to_string(bestCol + 1);
+
+      // No bestCols found
+      if (bestCols[0] == 0) {
+        std::cout << "User wins!" << std::endl;
+        return 0;
+      }
+
+      int r = (rand() % bestCols[0]) + 1;
+      play = bestCols[r] + '0';
       line = line + play;
       std::cout << "Computer Playing " << play << std::endl;
 
@@ -117,6 +131,7 @@ int main(int argc, char** argv) {
             return 0;
         } else {
             std::cout << "Computer Invalid move " << (P2.nbMoves() + 1) << " \"" << line << "\"" << std::endl;
+            if (bestCols[0] == 0) std::cout << "User wins?" << std::endl;
         }
       }
     }
