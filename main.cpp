@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
 
   for(int ply = 1; std::getline(std::cin, l); ply++) {
     Position P;
+
     newLine = line + l;
 
     std::cout << "User Playing " << newLine << std::endl;
@@ -135,5 +136,8 @@ int main(int argc, char** argv) {
         }
       }
     }
+    char *board = P.printBoard();
+    std::cout << board;
+
   }
 }

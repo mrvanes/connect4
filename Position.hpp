@@ -74,7 +74,7 @@ namespace Connect4 {
  * in practice, as bottom is constant, key = position + mask is also a
  * non-ambigous representation of the position.
  */
-  
+
 /**
  * Generate a bitmask containing one for the bottom slot of each colum
  * must be defined outside of the class definition to be available at compile time for bottom_mask
@@ -243,6 +243,23 @@ class Position {
     return winning_position() & possible() & column_mask(col);
   }
 
+  /**
+   * A string and method representing the board
+   * Position::WIDTH + 1 contain the newline characters
+   * @return the board as a printable string
+   */
+  char board[Position::HEIGHT * (Position::WIDTH + 1)];
+
+  char *printBoard() {
+    for (int r = 0; r < Position::HEIGHT; r++) {
+      for (int c = 0; c <= Position::WIDTH; c++) {
+         Position::board[r * (Position::WIDTH + 1) + c] = '.';
+      }
+      Position::board[(r + 1) * Position::WIDTH + r] = '\n';
+    }
+    return Position::board;
+  }
+
  private:
   position_t current_position; // bitmap of the current_player stones
   position_t mask;             // bitmap of all the already palyed spots
@@ -329,7 +346,7 @@ class Position {
   }
 
   // Static bitmaps
-  template<int width, int height> struct bottom {static constexpr position_t mask = bottom<width-1, height>::mask | position_t(1) << (width - 1) * (height + 1);};
+  template <int width, int height> struct bottom {static constexpr position_t mask = bottom<width-1, height>::mask | position_t(1) << (width - 1) * (height + 1);};
   template <int height> struct bottom<0, height> {static constexpr position_t mask = 0;};
 
   static constexpr position_t bottom_mask = bottom<WIDTH, HEIGHT>::mask;
